@@ -16,6 +16,12 @@ const GET_RECIPE = gql`
       steps
       category
       tags
+      likes {
+        id
+        user {
+          id
+        }
+      }
       author {
         id
         name
@@ -34,6 +40,7 @@ const GET_RECIPE = gql`
           avatar
         }
       }
+
     }
   }
 `;
@@ -51,9 +58,38 @@ const GET_USER_PROFILE = gql`
         id
         name
       }
+     
     }
   }
 `;
+
+// const GET_BOOKMARKED_RECIPES = gql`
+//   query GetBookmarkedRecipes {
+//     getBookmarkedRecipes {
+//       id
+//       recipe {
+//         id
+//         title
+//         description
+//         image
+//         cookingTime
+//         category
+//         author {
+//           id
+//           name
+//           avatar
+//         }
+//         likes {
+//           id
+//           user {
+//             id
+//             name
+//           }
+//         }
+//       }
+//     }
+//   }
+// `;
 
 const FOLLOW_USER = gql`
   mutation FollowUser($targetUserId: ID!) {
@@ -68,8 +104,8 @@ const UNFOLLOW_USER = gql`
 `;
 
 const RATE_RECIPE = gql`
-  mutation RateRecipe($recipeId: ID!, $rating: Int!) {
-    rateRecipe(recipeId: $recipeId, rating: $rating) {
+  mutation RateRecipe($id: ID!, $rating: Int!) {
+    rateRecipe(recipeId: $id, rating: $rating) {
       id
       rating
       user {
@@ -83,6 +119,53 @@ const RATE_RECIPE = gql`
     }
   }
 `;
+
+const LIKE_RECIPE = gql`
+  mutation LikeRecipe($recipeId:ID!){
+    likeRecipe(recipeId:$recipeId){
+      id
+      recipe {
+        id
+        likesCount
+      }
+    }
+  }
+`;
+
+const UNLIKE_RECIPE = gql`
+  mutation UnlikeRecipe($recipeId: ID!) {
+    unlikeRecipe(recipeId: $recipeId) {
+      id
+      recipe {
+        id
+        likesCount
+      }
+    }
+  }
+`;
+
+// const BOOKMARK_RECIPE = gql`
+//   mutation BookmarkRecipe($recipeId: ID!) {
+//     bookmarkRecipe(recipeId: $recipeId) {
+//       id
+//       recipe {
+//         id
+//       }
+//     }
+//   }
+// `;
+
+// const REMOVE_BOOKMARK = gql`
+//   mutation RemoveBookmark($recipeId: ID!) {
+//     removeBookmark(recipeId: $recipeId) {
+//       id
+//       recipe {
+//         id
+//       }
+//     }
+//   }
+// `;
+
 const RecipeDetail = () => {
   const { id } = useParams();
 
@@ -105,7 +188,10 @@ const RecipeDetail = () => {
   const [rateRecipe] = useMutation(RATE_RECIPE, {
     refetchQueries: [{ query: GET_RECIPE, variables: { id} }],
   });
-
+  const [likeRecipe] = useMutation(LIKE_RECIPE);
+  const [unlikeRecipe] = useMutation(UNLIKE_RECIPE);
+  // const [bookmarkRecipe] = useMutation(BOOKMARK_RECIPE);
+  // const [removeBookmark] = useMutation(REMOVE_BOOKMARK);
 
   // Handle loading errors
   if (loading || userLoading) return <p>Loading...</p>;
@@ -115,9 +201,17 @@ const RecipeDetail = () => {
   const recipe = data?.recipe;
   const currentUser = userData?.getCurrentUser;
   const isAuthor = currentUser?.id === recipe.author.id;
-   
+  //  console.log(recipe)
   // Check if user is following
   const isFollowing = currentUser?.following?.some((u) => u.id === recipe.author.id) ?? false;
+
+  const isLiked = currentUser?.likedRecipes?.some(
+    like => like.id === id
+  );
+  
+  // const isBookmarked = currentUser?.bookmarks?.some(
+  //   bookmark => bookmark.recipe.id === id
+  // );
   // console.log(isFollowing)
   // Follow/Unfollow User
   const handleFollow = async () => {
@@ -147,6 +241,35 @@ const RecipeDetail = () => {
   ? recipe.ratings.reduce((sum, r) => sum + r.rating, 0) / recipe.ratings.length
   : 0;
 
+
+  const handleLike = async () => {
+    if (isLiked) {
+      await unlikeRecipe({
+        variables: { recipeId: id },
+        refetchQueries: [{ query: GET_RECIPE }, { query: GET_USER_PROFILE }]
+      });
+    } else {
+      await likeRecipe({
+        variables: { recipeId: id },
+        refetchQueries: [{ query: GET_RECIPE }, { query: GET_USER_PROFILE }]
+      });
+    }
+  };
+
+  // const handleBookmark = async () => {
+  //   if (isBookmarked) {
+  //     await removeBookmark({
+  //       variables: { recipeId: id },
+  //       refetchQueries: [{ query: GET_USER_PROFILE }, { query: GET_BOOKMARKED_RECIPES }]
+  //     });
+  //   } else {
+  //     await bookmarkRecipe({
+  //       variables: { recipeId: id },
+  //       refetchQueries: [{ query: GET_USER_PROFILE }, { query: GET_BOOKMARKED_RECIPES }]
+  //     });
+  //   }
+  // };
+
   return (
     <div className="max-w-4xl mx-auto p-5">
       <motion.div
@@ -175,7 +298,27 @@ const RecipeDetail = () => {
             </span>
           ))}
         </div>
-
+        <div className="flex gap-3 mt-4">
+      <button
+        onClick={handleLike}
+        className={`flex items-center gap-2 ${
+          isLiked ? 'text-red-500' : 'text-gray-700'
+        } px-4 py-2 rounded-md`}
+      >
+        <FaHeart />
+        {recipe.likes?.length || 0} 
+      </button>
+      
+      {/* <button
+        onClick={handleBookmark}
+        className={`flex items-center gap-2 ${
+          isBookmarked ? 'text-blue-500' : 'text-gray-700'
+        } px-4 py-2 rounded-md`}
+      >
+        <FaBookmark />
+        {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+      </button> */}
+    </div>
         {!isAuthor && (
           <div className="flex items-center mt-3 gap-3">
             <p className="text-gray-700">{recipe.author.name}</p>

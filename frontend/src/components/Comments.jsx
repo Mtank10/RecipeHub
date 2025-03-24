@@ -34,7 +34,7 @@ const Comments = ({ recipeId }) => {
   const [addComment] = useMutation(ADD_COMMENT, {
     refetchQueries: [{ query: GET_COMMENTS, variables: { recipeId } }],
   });
-
+  // console.log(new Date().toLocaleString())
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -61,7 +61,7 @@ const Comments = ({ recipeId }) => {
         />
         <button
           type="submit"
-          className="mt-2 bg-primary text-white px-4 py-2 rounded-md"
+          className="mt-2 bg-black text-white px-4 py-2 rounded-md"
         >
           Post Comment
         </button>
@@ -81,7 +81,7 @@ const Comments = ({ recipeId }) => {
               />
               <span className="font-semibold">{comment.user.name}</span>
               <span className="text-sm text-gray-500">
-                {new Date(comment.createdAt).toLocaleDateString()}
+                {new Date(parseInt(comment.createdAt)).toLocaleString()}
               </span>
             </div>
             <p className="text-gray-700">{comment.content}</p>

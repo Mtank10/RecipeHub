@@ -40,7 +40,7 @@ export const authResolvers = {
     recipe: async (_, { id }) => {
       return  await prisma.recipe.findUnique({
        where: { id },
-       include: { author: true, ingredients: true, comments: true, likes: true,bookmark:true, ratings: {include:{user:true}} },
+       include: { author: true, ingredients: true, comments: true, likes: true,bookmark:true, ratings: {include:{user:true}} ,likes: { include: { user: true } },},
      })
    },
    categories: async ()=>{
@@ -68,7 +68,8 @@ export const authResolvers = {
         likes: { include: { user: true } },
         ratings: {
           include: {
-            user: true
+            user: true,
+            recipe:true
           }
         }
       },
@@ -101,6 +102,21 @@ export const authResolvers = {
       },
     });
     return recipe;
+  },
+  getBookmarkedRecipes: async (_, __, context) => {
+    if (!context.user) throw new GraphQLError("Unauthorized");
+    
+    return await prisma.bookmark.findMany({
+      where: { userId: context.user.id },
+      include: {
+        recipe: {
+          include: {
+            author: true,
+            likes: true,
+          },
+        },
+      },
+    });
   },
   
   },
@@ -196,12 +212,12 @@ export const authResolvers = {
     },
     rateRecipe: async (_, { recipeId, rating }, context) => {
       if (!context.user) throw new GraphQLError("Not authenticated");
-      
+      // console.log(recipeId,rating)
       return await prisma.rating.upsert({
         where: {
           userId_recipeId: {
             userId: context.user.id,
-            recipeId
+            recipeId:recipeId
           }
         },
         update: { rating },
@@ -211,7 +227,85 @@ export const authResolvers = {
           recipe: { connect: { id: recipeId } }
         },
         include: {
-          user: true // Include user in the response
+          user: true, // Include user in the response
+          recipe:true
+        }
+      });
+    },
+    likeRecipe: async (_, { recipeId }, context) => {
+      if (!context.user) throw new GraphQLError("Unauthorized");
+      
+      const existingLike = await prisma.recipeLike.findFirst({
+        where: {
+          userId: context.user.id,
+          recipeId
+        }
+      });
+
+      if (existingLike) {
+        throw new GraphQLError("Already liked");
+      }
+
+      return prisma.recipeLike.create({
+        data: {
+          user: { connect: { id: context.user.id } },
+          recipe: { connect: { id: recipeId } }
+        },
+        include: { recipe: {include:{likes:true}} }
+      });
+    },
+
+    unlikeRecipe: async (_, { recipeId }, context) => {
+      if (!context.user) throw new GraphQLError("Unauthorized");
+
+      const like = await prisma.recipeLike.findFirst({
+        where: {
+          userId: context.user.id,
+          recipeId
+        }
+      });
+
+      if (!like) {
+        throw new GraphQLError("Not liked");
+      }
+
+      await prisma.recipeLike.delete({
+        where: { id: like.id },
+        include: { recipe: true }
+      });
+      return await prisma.recipe.findUnique({
+        where: { id: recipeId },
+        include: { likes: true }
+      });
+    },
+
+    bookmarkRecipe: async (_, { recipeId }, context) => {
+      if (!context.user) throw new GraphQLError("Unauthorized");
+      
+      return prisma.bookmark.upsert({
+        where: {
+          userId_recipeId: {
+            userId: context.user.id,
+            recipeId
+          }
+        },
+        create: {
+          user: { connect: { id: context.user.id } },
+          recipe: { connect: { id: recipeId } }
+        },
+        update: {}
+      });
+    },
+
+    removeBookmark: async (_, { recipeId }, context) => {
+      if (!context.user) throw new GraphQLError("Unauthorized");
+
+      return prisma.bookmark.delete({
+        where: {
+          userId_recipeId: {
+            userId: context.user.id,
+            recipeId
+          }
         }
       });
     },

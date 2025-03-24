@@ -30,6 +30,7 @@ export const authTypeDefs = gql`
     ingredients:[Ingredient]!
     author:User!
     likes: [RecipeLike!]!
+    likesCount:Int!
     category:String!
     comments:[Comment]!
     createdAt:String!
@@ -46,6 +47,7 @@ export const authTypeDefs = gql`
   id: ID!
   user: User!
   recipe: Recipe!
+  createdAt:String!
 } 
   type Ingredient {
     id: ID!
@@ -77,11 +79,13 @@ export const authTypeDefs = gql`
   type Mutation {
     createRecipe(title: String!, description: String!, image: String, tags: [String]!, cookingTime: Int!, steps: [String]!, category: String!, ingredients: [IngredientInput]!): Recipe!
     likeRecipe(recipeId: ID!): RecipeLike!
-    unlikeRecipe(recipeId: ID!): String!
+    unlikeRecipe(recipeId: ID!): RecipeLike!
     followUser(targetUserId:ID!):String
     unfollowUser(targetUserId:ID!):String
     addComment(recipeId: ID!, content: String!): Comment!
     rateRecipe(recipeId:ID!,rating:Int!):Rating!
+    bookmarkRecipe(recipeId: ID!): Bookmark!
+    removeBookmark(recipeId: ID!): Bookmark!
   }
 
   input IngredientInput {
@@ -103,6 +107,7 @@ export const authTypeDefs = gql`
         getComments(recipeId: ID!): [Comment!]!
         categories:[String!]!
         recipeRating(id: ID!): Recipe
+        getBookmarkedRecipes: [Bookmark!]!
 
     }
     type Mutation {

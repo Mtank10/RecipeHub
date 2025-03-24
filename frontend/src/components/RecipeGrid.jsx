@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useQuery, gql } from "@apollo/client";
+import { FaHeart } from "react-icons/fa";
 
 const GET_RECIPES = gql`
   query GetRecipes($page: Int!, $limit: Int!, $category: String) {
@@ -95,6 +96,11 @@ const RecipeGrid = ({ selectedCategory, searchQuery ,recipes:passedRecipes }) =>
                 <div className="p-4">
                   <h3 className="text-lg font-bold">{recipe.title}</h3>
                   <p className="text-sm text-gray-600">{recipe.cookingTime} mins</p>
+                  <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-gray-600">
+                    <FaHeart className="inline mr-1" />
+                    {recipe.likes?.length || 0}
+                  </span>
                   {recipe.ratings.length > 0 ? (
   <StarRating
     rating={
@@ -105,6 +111,7 @@ const RecipeGrid = ({ selectedCategory, searchQuery ,recipes:passedRecipes }) =>
 ) : (
   <span className="text-gray-500 text-sm">No ratings yet</span>
 )}
+</div>
                   <button className="mt-3 bg-gray-300 text-black px-4 py-2 rounded-md w-full">
                     View Recipe
                   </button>

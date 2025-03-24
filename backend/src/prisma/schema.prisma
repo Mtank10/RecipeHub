@@ -25,10 +25,10 @@ model User {
   providerId   String   @unique
   following UserFollow[] @relation("Following")
   followers UserFollow[] @relation("Followers")
- likedRecipes RecipeLike[]
+  likedRecipes RecipeLike[]
   recipes   Recipe[]
   comments  Comment[]
-  bookmark Bookmark[]
+  bookmarks Bookmark[]
   ratings Rating[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -59,6 +59,7 @@ model Recipe {
   authorId    String
   author      User       @relation(fields: [authorId], references: [id])
   likes       RecipeLike[]
+  likesCount Int @default(0)
   category    String
   comments    Comment[]
   bookmark    Bookmark[]
