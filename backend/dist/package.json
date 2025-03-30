@@ -10,7 +10,7 @@
     "build": "npm run clean && npm run copy-assets",
     "clean": "rm -rf dist || true",
     "copy-assets": "mkdir -p dist && cp -r src/ dist/ && cp package.json dist/ && cp .env.production dist/.env",
-    "start:prod": "NODE_ENV=production node dist/index.js",
+    "start:prod": "NODE_ENV=production node dist/src/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "postinstall": "npm run prisma:generate",

@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { FaClock, FaUtensils, FaBookmark, FaHeart } from "react-icons/fa";
+import { FaClock, FaUtensils, FaBookmark, FaHeart, FaSpinner } from "react-icons/fa";
 import Comments from "../components/Comments";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import { StarRating } from "../components/RecipeGrid";
-
+import Loader from "../components/Loader";
 const GET_RECIPE = gql`
   query GetRecipe($id: ID!) {
     recipe(id: $id) {
@@ -194,8 +194,8 @@ const RecipeDetail = () => {
   // const [removeBookmark] = useMutation(REMOVE_BOOKMARK);
 
   // Handle loading errors
-  if (loading || userLoading) return <p>Loading...</p>;
-  if (error || userError) return <p>Error: {error?.message || userError?.message}</p>;
+  if (loading || userLoading) return <Loader/>;
+  if (error || userError) return <h3 className="text-lg text-center text-gray-800 mt-10 ">See More Your have to login first:</h3>;
 
   // Extracting Data
   const recipe = data?.recipe;

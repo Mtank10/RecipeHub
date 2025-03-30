@@ -25,6 +25,7 @@ const AppRoutes = () => {
           <Route path="courses" element={<CoursesPage />} />
           <Route path="community" element={<CommunityPage />} />
           <Route path="create-recipe" element={<CreateRecipe/>} />
+          
         </Route>
       </Routes>
     </Router>
