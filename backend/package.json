@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "generate": "prisma generate",
-  "build": "npm run generate",
+  "generate": "src/prisma generate",
   "start": "node src/server.js",
-  "postinstall": "prisma generate"
+  "postinstall": "src/prisma generate"
 },
 
   "prisma": {
