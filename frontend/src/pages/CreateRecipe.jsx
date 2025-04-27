@@ -13,6 +13,47 @@ const cld = new Cloudinary({
     } 
   });
 
+
+const GET_RECIPE = gql`
+  query GetRecipe($id: ID!) {
+    recipe(id: $id) {
+      id
+      title
+      description
+      image
+      cookingTime
+      steps
+      category
+      tags
+      likes {
+        id
+        user {
+          id
+        }
+      }
+      author {
+        id
+        name
+        avatar
+      }
+      ingredients {
+        id
+        name
+        quantity
+      }
+      ratings {
+        rating
+        user {
+          id
+          name
+          avatar
+        }
+      }
+
+    }
+  }
+`;
+
 const CREATE_RECIPE = gql`
   mutation CreateRecipe(
     $title: String!

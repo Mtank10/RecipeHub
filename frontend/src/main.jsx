@@ -6,10 +6,10 @@ import { ApolloProvider } from '@apollo/client'
 import client from './api/apolloClient.js'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Suspense } from 'react'
-import LogoLoader from './pages/LogoLoader.jsx'
+import Loader from './components/Loader.jsx'
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 createRoot(document.getElementById('root')).render(
-  <Suspense fallback={<LogoLoader/>}>
+  <Suspense fallback={<Loader/>}>
   <GoogleOAuthProvider clientId={googleClientId}>
    <QueryProvider>
   <ApolloProvider client={client}>

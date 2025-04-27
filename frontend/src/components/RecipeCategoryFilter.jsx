@@ -1,5 +1,6 @@
 import { useQuery,gql } from "@apollo/client";
 import { motion } from "framer-motion";
+import { FaSpinner } from "react-icons/fa";
 
 
 const GET_CATEGORIES = gql`
@@ -13,7 +14,7 @@ const GET_CATEGORIES = gql`
 
 const RecipeCategoryFilter = ({ selectedCategory, setSelectedCategory }) => {
   const { loading, error, data } = useQuery(GET_CATEGORIES);
-  if (loading) return <p>Loading categories...</p>;
+  if (loading) return <FaSpinner className="text-gray-200"/>
   if (error) return <p>Error loading categories</p>;
 
   return (
